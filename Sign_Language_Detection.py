@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[ ]:
+# In[8]:
 
 
 import cv2
@@ -14,14 +14,14 @@ import mediapipe as mp
 
 # Keypoints Using MP Holistics
 
-# In[ ]:
+# In[4]:
 
 
 mp_holistic = mp.solutions.holistic  # HOLISTICS MODEL
 mp_drawing = mp.solutions.drawing_utils # DRAWING UTILITIES
 
 
-# In[ ]:
+# In[5]:
 
 
 def mediapipe_detection(image, model):
@@ -33,7 +33,7 @@ def mediapipe_detection(image, model):
     return image, results
 
 
-# In[51]:
+# In[6]:
 
 
 def draw_landmarks(image, results):
@@ -44,7 +44,7 @@ def draw_landmarks(image, results):
     
 
 
-# In[66]:
+# In[7]:
 
 
 def draw_styled_landmarks(image, results):
@@ -73,7 +73,7 @@ def draw_styled_landmarks(image, results):
     
 
 
-# In[67]:
+# In[9]:
 
 
 cap = cv2.VideoCapture(0)
@@ -103,13 +103,43 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence 
     cv2.destroyAllWindows()
 
 
-# In[58]:
+# In[11]:
 
 
-
+results.pose_landmarks
 
 
 # 3> Extract Keypoints Values
+
+# In[17]:
+
+
+pose = []
+for res in results.pose_landmarks.landmark:
+    test = np.array([res.x, res.y, res.z, res.visibility])
+    pose.append(test)
+
+
+# In[33]:
+
+
+pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_landmarks.landmark]).flatten() if results.pose_landmarks else np.zeros(132)
+lh = np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten() if results.left_hand_landmarks else np.zeros(21*3)
+rh = np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(21*3)
+face  = np.array([[res.x, res.y, res.z] for res in results.face_landmarks.landmark]).flatten() if results.face_landmarks else np.zeros(1404)
+
+
+# In[36]:
+
+
+def extract_keypoints(results):
+    pose = np.array([[res.x, res.y, res.z, res.visibility] for res in results.pose_landmarks.landmark]).flatten() if results.pose_landmarks else np.zeros(132)
+    face  = np.array([[res.x, res.y, res.z] for res in results.face_landmarks.landmark]).flatten() if results.face_landmarks else np.zeros(1404)
+    lh = np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten() if results.left_hand_landmarks else np.zeros(21*3)
+    rh = np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(21*3)
+    return np.concatenate([pose, face, lh, rh])
+    
+
 
 # In[ ]:
 
